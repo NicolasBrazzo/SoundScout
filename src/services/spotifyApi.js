@@ -47,9 +47,17 @@ async function apiFetch(endpoint, token, options = {}) {
 }
 
 // /browse/new-releases è deprecato da febbraio 2026 per app senza extended access.
-// Alternativa: /search con tag:new restituisce la stessa struttura { albums: { items, total } }
-export async function getNewReleases(token, market = 'IT', offset = 0, limit = 50) {
-  const params = new URLSearchParams({ q: 'tag:new', type: 'album', market, limit, offset });
+// Alternativa: /search con tag:new. Limite max per request ora è 10 (febbraio 2026).
+const SEARCH_MAX_LIMIT = 10;
+
+export async function getNewReleases(token, market = 'IT', offset = 0, limit = SEARCH_MAX_LIMIT) {
+  const params = new URLSearchParams({
+    q: 'tag:new',
+    type: 'album',
+    market,
+    limit: Math.min(limit, SEARCH_MAX_LIMIT),
+    offset,
+  });
   return apiFetch(`/search?${params}`, token);
 }
 
@@ -91,19 +99,18 @@ export async function batchFetchGenres(releases, token) {
 export async function getAllNewReleases(token, market = 'IT') {
   const allReleases = [];
   let offset = 0;
-  const limit = 50;
 
   while (true) {
-    const data = await getNewReleases(token, market, offset, limit);
+    const data = await getNewReleases(token, market, offset);
     const { items, total } = data.albums;
 
     allReleases.push(...items);
 
-    if (allReleases.length >= total || items.length < limit) {
+    if (allReleases.length >= total || items.length < SEARCH_MAX_LIMIT) {
       break;
     }
 
-    offset += limit;
+    offset += SEARCH_MAX_LIMIT;
   }
 
   return allReleases;
