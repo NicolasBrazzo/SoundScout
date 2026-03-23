@@ -30,31 +30,35 @@ export function useArtistGenres(releases) {
     async function fetchMissing() {
       setLoading(true);
 
-      if (uncachedIds.length > 0) {
-        const token = await getToken();
-        const uncachedReleases = releases.filter((r) =>
-          r.artists.some((a) => uncachedIds.includes(a.id))
-        );
-        const newEntries = await batchFetchGenres(uncachedReleases, token);
-        newEntries.forEach((genres, id) => genresCache.set(id, genres));
+      try {
+        if (uncachedIds.length > 0) {
+          const token = await getToken();
+          const uncachedReleases = releases.filter((r) =>
+            r.artists.some((a) => uncachedIds.includes(a.id))
+          );
+          const newEntries = await batchFetchGenres(uncachedReleases, token);
+          newEntries.forEach((genres, id) => genresCache.set(id, genres));
+        }
+
+        // Costruisce la mappa completa dalla cache
+        const merged = new Map(allArtistIds.map((id) => [id, genresCache.get(id) ?? []]));
+        setGenresByArtistId(merged);
+
+        // Lista generi unici ordinati alfabeticamente, "Altro" sempre in fondo
+        const genreSet = new Set();
+        let hasUnknown = false;
+        merged.forEach((genres) => {
+          if (genres.length === 0) { hasUnknown = true; return; }
+          genres.forEach((g) => genreSet.add(g));
+        });
+        const sorted = [...genreSet].sort((a, b) => a.localeCompare(b));
+        if (hasUnknown) sorted.push('Altro');
+        setAllGenres(sorted);
+      } catch (err) {
+        console.error('Errore nel recupero dei generi:', err);
+      } finally {
+        setLoading(false);
       }
-
-      // Costruisce la mappa completa dalla cache
-      const merged = new Map(allArtistIds.map((id) => [id, genresCache.get(id) ?? []]));
-      setGenresByArtistId(merged);
-
-      // Lista generi unici ordinati alfabeticamente, "Altro" sempre in fondo
-      const genreSet = new Set();
-      let hasUnknown = false;
-      merged.forEach((genres) => {
-        if (genres.length === 0) { hasUnknown = true; return; }
-        genres.forEach((g) => genreSet.add(g));
-      });
-      const sorted = [...genreSet].sort((a, b) => a.localeCompare(b));
-      if (hasUnknown) sorted.push('Altro');
-      setAllGenres(sorted);
-
-      setLoading(false);
     }
 
     fetchMissing();
