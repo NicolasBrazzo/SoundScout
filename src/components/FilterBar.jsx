@@ -18,6 +18,8 @@ export default function FilterBar({
   onSearchChange,
   selectedTypes,
   onTypesChange,
+  italianOnly,
+  onItalianOnlyChange,
   totalCount,
   filteredCount,
 }) {
@@ -28,12 +30,13 @@ export default function FilterBar({
   }
 
   const hasActiveFilters =
-    selectedGenres.size > 0 || searchQuery.trim() || selectedTypes.size > 0;
+    selectedGenres.size > 0 || searchQuery.trim() || selectedTypes.size > 0 || italianOnly;
 
   function clearAll() {
     onGenresChange(new Set());
     onSearchChange('');
     onTypesChange(new Set());
+    onItalianOnlyChange(false);
   }
 
   return (
@@ -63,6 +66,18 @@ export default function FilterBar({
             );
           })}
         </div>
+
+        {/* Filtro italiani */}
+        <button
+          onClick={() => onItalianOnlyChange(!italianOnly)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            italianOnly
+              ? 'bg-[#009246] text-white'
+              : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+          }`}
+        >
+          Solo italiani
+        </button>
 
         {/* Contatore + clear */}
         <div className="flex items-center gap-2 ml-auto text-xs text-white/30">

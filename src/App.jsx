@@ -12,9 +12,20 @@ export default function App() {
   const [selectedGenres, setSelectedGenres] = useState(new Set());
   const [searchQuery, setSearchQuery]       = useState('');
   const [selectedTypes, setSelectedTypes]   = useState(new Set());
+  const [italianOnly, setItalianOnly]       = useState(false);
 
   const filteredReleases = useMemo(() => {
     return releases.filter((release) => {
+      if (italianOnly) {
+        const artistGenres = release.artists.flatMap(
+          (a) => genresByArtistId.get(a.id) ?? []
+        );
+        const isItalian = artistGenres.some(
+          (g) => g.includes('italian') || g.includes('italiano') || g.includes('italiana')
+        );
+        if (!isItalian) return false;
+      }
+
       if (selectedGenres.size > 0) {
         const artistGenres = release.artists.flatMap(
           (a) => genresByArtistId.get(a.id) ?? []
@@ -36,7 +47,7 @@ export default function App() {
 
       return true;
     });
-  }, [releases, selectedGenres, searchQuery, selectedTypes, genresByArtistId]);
+  }, [releases, selectedGenres, searchQuery, selectedTypes, italianOnly, genresByArtistId]);
 
   return (
     <div className="min-h-screen">
@@ -50,6 +61,8 @@ export default function App() {
           onSearchChange={setSearchQuery}
           selectedTypes={selectedTypes}
           onTypesChange={setSelectedTypes}
+          italianOnly={italianOnly}
+          onItalianOnlyChange={setItalianOnly}
           totalCount={releases.length}
           filteredCount={filteredReleases.length}
         />
