@@ -4,18 +4,19 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { batchFetchGenres } from '../services/spotifyApi';
+import { getToken } from '../services/tokenService';
 
 // Cache globale — persiste per tutta la sessione senza re-fetch
 const genresCache = new Map();
 
-export function useArtistGenres(releases, token) {
+export function useArtistGenres(releases) {
   const [genresByArtistId, setGenresByArtistId] = useState(new Map());
   const [allGenres, setAllGenres] = useState([]);
   const [loading, setLoading] = useState(false);
   const prevReleaseIds = useRef('');
 
   useEffect(() => {
-    if (!token || releases.length === 0) return;
+    if (releases.length === 0) return;
 
     // Evita re-fetch se le release non sono cambiate
     const releaseIds = releases.map((r) => r.id).join(',');
@@ -30,7 +31,7 @@ export function useArtistGenres(releases, token) {
       setLoading(true);
 
       if (uncachedIds.length > 0) {
-        // batchFetchGenres gestisce solo gli ID non ancora in cache
+        const token = await getToken();
         const uncachedReleases = releases.filter((r) =>
           r.artists.some((a) => uncachedIds.includes(a.id))
         );
@@ -57,7 +58,7 @@ export function useArtistGenres(releases, token) {
     }
 
     fetchMissing();
-  }, [releases, token]);
+  }, [releases]);
 
   return { genresByArtistId, allGenres, loading };
 }

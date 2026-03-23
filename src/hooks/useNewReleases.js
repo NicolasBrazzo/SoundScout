@@ -3,20 +3,18 @@
 
 import { useState, useEffect } from 'react';
 import { getAllNewReleases } from '../services/spotifyApi';
+import { getToken } from '../services/tokenService';
 import { isAfterLastFriday } from '../utils/dateUtils';
 
 /**
- * @param {string|null} token - Access token Spotify. Il fetch parte solo quando non è null.
  * @returns {{ releases: Array, loading: boolean, error: string|null }}
  */
-export function useNewReleases(token) {
+export function useNewReleases() {
   const [releases, setReleases] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!token) return;
-
     let cancelled = false;
 
     async function fetchReleases() {
@@ -24,6 +22,7 @@ export function useNewReleases(token) {
       setError(null);
 
       try {
+        const token = await getToken();
         const all = await getAllNewReleases(token);
         const filtered = all.filter(isAfterLastFriday);
 
@@ -46,7 +45,7 @@ export function useNewReleases(token) {
     return () => {
       cancelled = true;
     };
-  }, [token]);
+  }, []);
 
   return { releases, loading, error };
 }
