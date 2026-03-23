@@ -46,8 +46,8 @@ async function apiFetch(endpoint, token, options = {}) {
   }
 }
 
-export async function getNewReleases(token, country = 'IT', offset = 0, limit = 50) {
-  const params = new URLSearchParams({ country, limit, offset });
+export async function getNewReleases(token, market = 'IT', offset = 0, limit = 50) {
+  const params = new URLSearchParams({ market, limit, offset });
   return apiFetch(`/browse/new-releases?${params}`, token);
 }
 
@@ -86,13 +86,13 @@ export async function batchFetchGenres(releases, token) {
   return genresMap;
 }
 
-export async function getAllNewReleases(token, country = 'IT') {
+export async function getAllNewReleases(token, market = 'IT') {
   const allReleases = [];
   let offset = 0;
   const limit = 50;
 
   while (true) {
-    const data = await getNewReleases(token, country, offset, limit);
+    const data = await getNewReleases(token, market, offset, limit);
     const { items, total } = data.albums;
 
     allReleases.push(...items);
