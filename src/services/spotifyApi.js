@@ -46,9 +46,11 @@ async function apiFetch(endpoint, token, options = {}) {
   }
 }
 
+// /browse/new-releases è deprecato da febbraio 2026 per app senza extended access.
+// Alternativa: /search con tag:new restituisce la stessa struttura { albums: { items, total } }
 export async function getNewReleases(token, market = 'IT', offset = 0, limit = 50) {
-  const params = new URLSearchParams({ market, limit, offset });
-  return apiFetch(`/browse/new-releases?${params}`, token);
+  const params = new URLSearchParams({ q: 'tag:new', type: 'album', market, limit, offset });
+  return apiFetch(`/search?${params}`, token);
 }
 
 /**
