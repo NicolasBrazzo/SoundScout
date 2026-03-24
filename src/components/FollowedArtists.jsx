@@ -1,34 +1,11 @@
-import { useEffect, useState } from "react";
-import {
-  getFollowedArtists,
-  getArtistAlbums,
-} from "../services/artistsService";
+import { useState } from "react";
+import { getArtistAlbums } from "../services/artistsService";
 import Popup from "./Popup";
 import SkeletonGrid from "./SkeletonGrid";
 
-export const FollowedArtists = () => {
-  const [followedArtists, setFollowedArtists] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const FollowedArtists = ({ artists: followedArtists = [], loading = false }) => {
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [artistAlbums, setArtistAlbums] = useState([]);
-
-  useEffect(() => {
-    let ignore = false;
-    async function fetchArtists() {
-      try {
-        const artists = await getFollowedArtists();
-        if (!ignore) setFollowedArtists(artists);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    }
-    fetchArtists();
-    return () => {
-      ignore = true;
-    };
-  }, []);
 
   const handleSelectArtist = async (artist) => {
     setSelectedArtist(artist);

@@ -1,16 +1,24 @@
-# React + Vite
+# SoundScout
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SoundScout ti permette di esplorare le novità musicali a partire dai tuoi artisti preferiti su Spotify.
 
-Currently, two official plugins are available:
+## Funzionalità
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Login con Spotify** — Autenticazione sicura tramite OAuth 2.0 PKCE, senza bisogno di un server backend.
+- **Artisti seguiti** — Visualizza la griglia degli artisti che segui su Spotify, con immagine e nome.
+- **Dettaglio artista** — Cliccando su un artista si apre un popup con generi, link a Spotify e la lista dei suoi album.
+- **Ultime uscite** — Mostra gli album e i singoli usciti da venerdì scorso ad oggi, raccolti da tutti gli artisti che segui.
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [React](https://react.dev) 19
+- [Vite](https://vite.dev) 8
+- [Tailwind CSS](https://tailwindcss.com) 4
+- [Spotify Web API](https://developer.spotify.com/documentation/web-api)
 
-## Expanding the ESLint configuration
+## Avvio locale
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```

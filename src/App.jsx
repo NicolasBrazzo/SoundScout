@@ -52,5 +52,5 @@ async function fetchUserProfile(token) {
     headers: { Authorization: `Bearer ${token}` },
   });
   const data = await res.json();
-  console.log('Spotify User Profile:', data);
+  // console.log('Spotify User Profile:', data);
 }
