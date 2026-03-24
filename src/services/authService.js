@@ -12,7 +12,7 @@ const CLIENT_ID = "3e5fe8552ead47aa9ba7188e322e705f";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
-const SCOPES = "user-read-private user-read-email playlist-read-private";
+const SCOPES = "user-read-private playlist-read-private user-top-read user-follow-read";
 
 /**
  * Redirect URI: http://127.0.0.1 in sviluppo locale, HTTPS in produzione.
@@ -91,8 +91,21 @@ export async function login() {
  * Gestisce il callback dopo il redirect da Spotify.
  * Scambia il code per access_token + refresh_token.
  * Pulisce l'URL e restituisce l'access_token.
+ * Deduplica chiamate concorrenti (React StrictMode).
  */
+let _callbackPromise = null;
+
 export async function handleCallback() {
+  if (_callbackPromise) return _callbackPromise;
+  _callbackPromise = _doHandleCallback();
+  try {
+    return await _callbackPromise;
+  } finally {
+    _callbackPromise = null;
+  }
+}
+
+async function _doHandleCallback() {
   const params = new URLSearchParams(window.location.search);
   const code = params.get("code");
   const error = params.get("error");
@@ -139,8 +152,22 @@ export async function handleCallback() {
 /**
  * Rinnova l'access_token usando il refresh_token.
  * Restituisce { access_token, expires_in }.
+ * Deduplica chiamate concorrenti (es. React StrictMode) per evitare
+ * che Spotify ruoti il refresh_token sotto la seconda chiamata.
  */
+let _refreshPromise = null;
+
 export async function refreshAccessToken() {
+  if (_refreshPromise) return _refreshPromise;
+  _refreshPromise = _doRefresh();
+  try {
+    return await _refreshPromise;
+  } finally {
+    _refreshPromise = null;
+  }
+}
+
+async function _doRefresh() {
   const refreshToken = localStorage.getItem(STORAGE_KEYS.refreshToken);
   if (!refreshToken) {
     throw new Error("Nessun refresh token. Effettua il login.");
