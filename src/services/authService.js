@@ -12,7 +12,7 @@ const CLIENT_ID = "3e5fe8552ead47aa9ba7188e322e705f";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
-const SCOPES = "user-read-private user-read-email";
+const SCOPES = "user-read-private user-read-email playlist-read-public";
 
 /**
  * Redirect URI: http://127.0.0.1 in sviluppo locale, HTTPS in produzione.
