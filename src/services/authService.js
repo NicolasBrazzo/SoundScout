@@ -9,13 +9,25 @@
 //   5. logout() → pulisce tutto
 
 const CLIENT_ID = "3e5fe8552ead47aa9ba7188e322e705f";
-const REDIRECT_URI = window.location.origin + "/callback";
 const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize";
 const TOKEN_ENDPOINT = "https://accounts.spotify.com/api/token";
 
-// Nessuno scope necessario: i dati pubblici (playlist, artisti, search)
-// sono accessibili senza scope aggiuntivi.
-const SCOPES = "";
+const SCOPES = "user-read-private user-read-email";
+
+/**
+ * Redirect URI: http://127.0.0.1 in sviluppo locale, HTTPS in produzione.
+ * In dev Vite serve su 127.0.0.1 — usiamo sempre quello come hostname locale
+ * per evitare mismatch con il Spotify Developer Dashboard.
+ */
+function getRedirectUri() {
+  const { hostname, port } = window.location;
+  if (hostname === "127.0.0.1" || hostname === "localhost") {
+    return `http://127.0.0.1${port ? ":" + port : ""}/callback`;
+  }
+  return `https://${hostname}/callback`;
+}
+
+const REDIRECT_URI = getRedirectUri();
 
 const STORAGE_KEYS = {
   refreshToken: "soundscout_refresh_token",
