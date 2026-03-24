@@ -1,10 +1,9 @@
-// Hook che recupera tutte le nuove uscite Spotify dal venerdì più recente.
-// Gestisce il ciclo completo: fetch paginato → filtro per data → stati loading/error/empty.
+// Hook che recupera le ultime uscite degli artisti più popolari in Italia
+// (chart Spotify + artisti correlati). Gestisce stati loading/error.
 
 import { useState, useEffect } from 'react';
-import { getAllNewReleases } from '../services/spotifyApi';
+import { getFeaturedReleases } from '../services/spotifyApi';
 import { getToken } from '../services/tokenService';
-import { isAfterLastFriday } from '../utils/dateUtils';
 
 /**
  * @returns {{ releases: Array, loading: boolean, error: string|null }}
@@ -23,15 +22,14 @@ export function useNewReleases() {
 
       try {
         const token = await getToken();
-        const all = await getAllNewReleases(token);
-        const filtered = all.filter(isAfterLastFriday);
+        const data = await getFeaturedReleases(token);
 
         if (!cancelled) {
-          setReleases(filtered);
+          setReleases(data);
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.message ?? 'Errore nel caricamento delle nuove uscite.');
+          setError(err.message ?? 'Errore nel caricamento delle release.');
         }
       } finally {
         if (!cancelled) {

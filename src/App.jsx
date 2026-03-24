@@ -1,11 +1,41 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Header from './components/Header';
 import ReleaseGrid from './components/ReleaseGrid';
 import FilterBar from './components/FilterBar';
+import LoginScreen from './components/LoginScreen';
 import { useNewReleases } from './hooks/useNewReleases';
 import { useArtistGenres } from './hooks/useArtistGenres';
+import { isLoggedIn, handleCallback } from './services/authService';
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    async function initAuth() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('code')) {
+        try {
+          await handleCallback();
+          setAuthenticated(true);
+        } catch (err) {
+          console.error('Auth callback fallito:', err);
+        }
+      } else {
+        setAuthenticated(isLoggedIn());
+      }
+      setAuthLoading(false);
+    }
+    initAuth();
+  }, []);
+
+  if (authLoading) return null;
+  if (!authenticated) return <LoginScreen />;
+
+  return <AuthenticatedApp />;
+}
+
+function AuthenticatedApp() {
   const { releases, loading, error } = useNewReleases();
   const { genresByArtistId, allGenres } = useArtistGenres(releases);
 
