@@ -17,7 +17,7 @@ export class SpotifyApiError extends Error {
 
 // --- Helper per chiamate autenticate (con concurrency limiting e gestione 429) ---
 
-async function fetchSpotify(endpoint) {
+async function fetchSpotify(endpoint, retries = 3) {
   return enqueue(async () => {
     const token = await getToken();
     const res = await fetch(`${BASE_URL}${endpoint}`, {
@@ -28,7 +28,12 @@ async function fetchSpotify(endpoint) {
       const retryAfter = parseInt(res.headers.get('Retry-After') || '2', 10);
       // Ferma TUTTA la coda — non solo questa richiesta
       pauseQueue(retryAfter);
-      throw new SpotifyApiError(429, retryAfter);
+
+      if (retries <= 0) throw new SpotifyApiError(429, retryAfter);
+
+      // Aspetta che la pausa finisca, poi ritenta senza passare dalla coda
+      await new Promise((r) => setTimeout(r, retryAfter * 1000));
+      return fetchSpotify(endpoint, retries - 1);
     }
 
     if (!res.ok) throw new SpotifyApiError(res.status, null);

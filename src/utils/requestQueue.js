@@ -1,7 +1,8 @@
 // Concurrency limiter con pausa globale su rate limit.
 // Quando una richiesta riceve 429, l'intera coda si ferma per Retry-After secondi.
 
-const MAX_CONCURRENT = 2;
+const MAX_CONCURRENT = 1; // Serializza le richieste per evitare burst di 429
+const MIN_DELAY_MS = 1500; // ~20 richieste in 30s per stare nel rate limit dev mode
 let running = 0;
 const queue = [];
 let pausedUntil = 0;
@@ -20,7 +21,8 @@ function runNext() {
   const { fn, resolve, reject } = queue.shift();
   fn().then(resolve, reject).finally(() => {
     running--;
-    runNext();
+    // Piccolo delay tra una richiesta e l'altra per non saturare il rate limit
+    setTimeout(runNext, MIN_DELAY_MS);
   });
 }
 

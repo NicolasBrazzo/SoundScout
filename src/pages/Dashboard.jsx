@@ -17,7 +17,7 @@ export default function Dashboard() {
         </p>
       </section>
 
-      <MusicBrainzReleases />
+      {/* <MusicBrainzReleases /> */}
       <LatestReleases artists={followedArtists} loading={isLoading} />
       <FollowedArtists artists={followedArtists} loading={isLoading} />
     </div>

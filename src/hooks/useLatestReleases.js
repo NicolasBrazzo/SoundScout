@@ -9,6 +9,7 @@ export function useLatestReleases(artists = [], enabled = false) {
       queryKey: ['latestRelease', artist.id],
       queryFn: () => getArtistAlbums(artist.id, 1),
       staleTime: Infinity,
+      retry: false, // I retry vengono gestiti internamente da fetchSpotify
       enabled,
     })),
   });
