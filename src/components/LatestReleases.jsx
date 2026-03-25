@@ -1,56 +1,10 @@
-import { useEffect, useState } from "react";
-import { getArtistAlbums } from "../services/artistsService";
+import { useLatestReleases } from "../hooks/useLatestReleases";
 import SkeletonGrid from "./SkeletonGrid";
-import { getLastFriday } from "../utils/getLastFriday";
 
 export const LatestReleases = ({ artists = [], loading: artistsLoading = false }) => {
-  const [releases, setReleases] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { releases, isLoading } = useLatestReleases(artistsLoading ? [] : artists);
 
-  useEffect(() => {
-    if (artistsLoading || artists.length === 0) return;
-
-    let ignore = false;
-    async function fetchReleases() {
-      setLoading(true);
-      try {
-        const lastFriday = getLastFriday();
-        // Promise.allSettled => gestisce più chiamate in parallelo senza fallire se una fallisce
-        const results = await Promise.allSettled(
-          artists.map((artist) => getArtistAlbums(artist.id))
-        );
-
-        if (ignore) return;
-
-        const recentReleases = [];
-        results.forEach((result, i) => {
-          if (result.status !== "fulfilled") return;
-          for (const album of result.value) {
-            const releaseDate = new Date(album.release_date);
-            if (releaseDate >= lastFriday) {
-              recentReleases.push({ ...album, artist: artists[i] });
-            }
-          }
-        });
-
-        recentReleases.sort(
-          (a, b) => new Date(b.release_date) - new Date(a.release_date)
-        );
-        setReleases(recentReleases);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    }
-
-    fetchReleases();
-    return () => {
-      ignore = true;
-    };
-  }, [artists, artistsLoading]);
-
-  if (artistsLoading || loading) {
+  if (artistsLoading || isLoading) {
     return (
       <section className="max-w-7xl mx-auto px-4 py-8">
         <h2 className="text-xl font-bold text-white mb-6">Ultime uscite</h2>

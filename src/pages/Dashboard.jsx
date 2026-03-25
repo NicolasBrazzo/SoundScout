@@ -1,30 +1,10 @@
-import { useEffect, useState } from 'react';
-import { getFollowedArtists } from '../services/artistsService';
+import { useFollowedArtists } from '../hooks/useFollowedArtists';
 import { FollowedArtists } from '../components/FollowedArtists';
 import { LatestReleases } from '../components/LatestReleases';
 import Header from '../components/Header';
 
 export default function Dashboard() {
-  const [followedArtists, setFollowedArtists] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let ignore = false;
-    async function fetchArtists() {
-      try {
-        const artists = await getFollowedArtists();
-        if (!ignore) setFollowedArtists(artists);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        if (!ignore) setLoading(false);
-      }
-    }
-    fetchArtists();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  const { data: followedArtists = [], isLoading } = useFollowedArtists();
 
   return (
     <div className="min-h-screen">
@@ -36,8 +16,8 @@ export default function Dashboard() {
         </p>
       </section>
 
-      <LatestReleases artists={followedArtists} loading={loading} />
-      <FollowedArtists artists={followedArtists} loading={loading} />
+      <LatestReleases artists={followedArtists} loading={isLoading} />
+      <FollowedArtists artists={followedArtists} loading={isLoading} />
     </div>
   );
 }

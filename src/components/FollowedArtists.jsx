@@ -1,22 +1,11 @@
 import { useState } from "react";
-import { getArtistAlbums } from "../services/artistsService";
+import { useArtistAlbums } from "../hooks/useArtistAlbums";
 import Popup from "./Popup";
 import SkeletonGrid from "./SkeletonGrid";
 
 export const FollowedArtists = ({ artists: followedArtists = [], loading = false }) => {
   const [selectedArtist, setSelectedArtist] = useState(null);
-  const [artistAlbums, setArtistAlbums] = useState([]);
-
-  const handleSelectArtist = async (artist) => {
-    setSelectedArtist(artist);
-    setArtistAlbums([]);
-    try {
-      const albums = await getArtistAlbums(artist.id);
-      setArtistAlbums(albums);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { data: artistAlbums = [], isLoading: albumsLoading } = useArtistAlbums(selectedArtist?.id);
 
   if (loading) {
     return (
@@ -34,7 +23,7 @@ export const FollowedArtists = ({ artists: followedArtists = [], loading = false
         {followedArtists.length > 0 ?
           followedArtists.map((artist) => (
             <div
-              onClick={() => handleSelectArtist(artist)}
+              onClick={() => setSelectedArtist(artist)}
               key={artist.id}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
             >
@@ -112,7 +101,7 @@ export const FollowedArtists = ({ artists: followedArtists = [], loading = false
               <h4 className="text-sm font-semibold text-white/70 mb-3">
                 Album
               </h4>
-              {artistAlbums.length === 0 ?
+              {albumsLoading ?
                 <SkeletonGrid variant="album" count={6} />
               : <div className="grid grid-cols-3 gap-3">
                   {artistAlbums.map((album) => (
