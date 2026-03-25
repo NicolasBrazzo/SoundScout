@@ -1,23 +1,29 @@
+import { useState } from "react";
 import { useLatestReleases } from "../hooks/useLatestReleases";
 import SkeletonGrid from "./SkeletonGrid";
 
 export const LatestReleases = ({ artists = [], loading: artistsLoading = false }) => {
-  const { releases, isLoading } = useLatestReleases(artistsLoading ? [] : artists);
-
-  if (artistsLoading || isLoading) {
-    return (
-      <section className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-xl font-bold text-white mb-6">Ultime uscite</h2>
-        <SkeletonGrid variant="album" count={6} />
-      </section>
-    );
-  }
+  const [loadRequested, setLoadRequested] = useState(false);
+  const { releases, isLoading } = useLatestReleases(
+    artistsLoading ? [] : artists,
+    loadRequested,
+  );
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
       <h2 className="text-xl font-bold text-white mb-6">Ultime uscite</h2>
 
-      {releases.length === 0 ? (
+      {!loadRequested ? (
+        <button
+          onClick={() => setLoadRequested(true)}
+          disabled={artistsLoading}
+          className="px-6 py-3 rounded-full bg-[#1db954] text-white font-medium hover:bg-[#1ed760] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Carica novità
+        </button>
+      ) : isLoading ? (
+        <SkeletonGrid variant="album" count={6} />
+      ) : releases.length === 0 ? (
         <p className="text-white/50">Nessuna nuova uscita da venerdì scorso.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
