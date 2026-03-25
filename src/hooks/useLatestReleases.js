@@ -8,6 +8,7 @@ export function useLatestReleases(artists = []) {
     queries: artists.map((artist) => ({
       queryKey: ['artistAlbums', artist.id],
       queryFn: () => getArtistAlbums(artist.id),
+      staleTime: Infinity, // Carica una volta per sessione
     })),
   });
 

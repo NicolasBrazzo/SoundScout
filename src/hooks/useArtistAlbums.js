@@ -6,5 +6,6 @@ export function useArtistAlbums(artistId) {
     queryKey: ['artistAlbums', artistId],
     queryFn: () => getArtistAlbums(artistId),
     enabled: !!artistId,
+    staleTime: Infinity, // Carica una volta per sessione
   });
 }
