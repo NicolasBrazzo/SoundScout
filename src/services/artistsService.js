@@ -92,7 +92,7 @@ export async function getRelatedArtists(artistId) {
   return data.artists; // Array di oggetti Artist
 }
 
-export async function getArtistAlbums(artistId, limit = 10) {
+export async function getArtistAlbums(artistId, limit = 1) {
   const data = await fetchSpotify(`/artists/${artistId}/albums?limit=${limit}`);
   return data.items.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
 }
