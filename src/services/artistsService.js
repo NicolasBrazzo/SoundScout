@@ -2,7 +2,7 @@
 // Endpoint docs: https://developer.spotify.com/documentation/web-api
 
 import { getToken } from './tokenService';
-import { enqueue } from '../utils/requestQueue';
+import { enqueue, pauseQueue } from '../utils/requestQueue';
 
 const BASE_URL = 'https://api.spotify.com/v1';
 
@@ -20,29 +20,18 @@ export class SpotifyApiError extends Error {
 async function fetchSpotify(endpoint) {
   return enqueue(async () => {
     const token = await getToken();
-    const headers = { Authorization: `Bearer ${token}` };
-    const res = await fetch(`${BASE_URL}${endpoint}`, { headers });
+    const res = await fetch(`${BASE_URL}${endpoint}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-    // Retry interno su 429: aspetta Retry-After e riprova una volta
     if (res.status === 429) {
-      const wait = parseInt(res.headers.get('Retry-After') || '1', 10);
-      await new Promise((r) => setTimeout(r, wait * 1000));
-      const retry = await fetch(`${BASE_URL}${endpoint}`, { headers });
-      if (!retry.ok) {
-        throw new SpotifyApiError(
-          retry.status,
-          parseInt(retry.headers.get('Retry-After') || '0', 10) || null,
-        );
-      }
-      return retry.json();
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '2', 10);
+      // Ferma TUTTA la coda — non solo questa richiesta
+      pauseQueue(retryAfter);
+      throw new SpotifyApiError(429, retryAfter);
     }
 
-    if (!res.ok) {
-      throw new SpotifyApiError(
-        res.status,
-        parseInt(res.headers.get('Retry-After') || '0', 10) || null,
-      );
-    }
+    if (!res.ok) throw new SpotifyApiError(res.status, null);
     return res.json();
   });
 }
