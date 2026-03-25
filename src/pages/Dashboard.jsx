@@ -1,6 +1,7 @@
 import { useFollowedArtists } from '../hooks/useFollowedArtists';
 import { FollowedArtists } from '../components/FollowedArtists';
 import { LatestReleases } from '../components/LatestReleases';
+import { MusicBrainzReleases } from '../components/MusicBrainzReleases';
 import Header from '../components/Header';
 
 export default function Dashboard() {
@@ -16,6 +17,7 @@ export default function Dashboard() {
         </p>
       </section>
 
+      <MusicBrainzReleases />
       <LatestReleases artists={followedArtists} loading={isLoading} />
       <FollowedArtists artists={followedArtists} loading={isLoading} />
     </div>
