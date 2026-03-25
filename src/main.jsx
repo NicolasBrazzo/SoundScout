@@ -11,16 +11,15 @@ const queryClient = new QueryClient({
       retry: (failureCount, error) => {
         // Non riprovare su errori di autenticazione
         if (error?.status === 401 || error?.status === 403) return false
-        // Rate limit: riprova fino a 3 volte
-        if (error?.status === 429) return failureCount < 3
-        // Errori generici: 2 tentativi
-        return failureCount < 2
+        // Rate limit: 1 solo retry (la coda è già in pausa)
+        if (error?.status === 429) return failureCount < 1
+        // Errori generici: 1 tentativo
+        return failureCount < 1
       },
-      retryDelay: (attemptIndex, error) => {
-        // Rispetta Retry-After di Spotify se presente
-        if (error?.retryAfter) return error.retryAfter * 1000
-        // Altrimenti backoff esponenziale: 1s, 2s, 4s… max 15s
-        return Math.min(1000 * 2 ** attemptIndex, 15000)
+      retryDelay: (_attemptIndex, error) => {
+        // Su 429 aspetta il Retry-After + margine (la coda è in pausa)
+        if (error?.retryAfter) return (error.retryAfter + 1) * 1000
+        return 2000
       },
     },
   },
