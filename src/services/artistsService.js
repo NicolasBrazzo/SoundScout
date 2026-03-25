@@ -2,18 +2,49 @@
 // Endpoint docs: https://developer.spotify.com/documentation/web-api
 
 import { getToken } from './tokenService';
+import { enqueue } from '../utils/requestQueue';
 
 const BASE_URL = 'https://api.spotify.com/v1';
 
-// --- Helper per chiamate autenticate ---
+// Errore con status code e Retry-After per gestione smart dei retry
+export class SpotifyApiError extends Error {
+  constructor(status, retryAfter) {
+    super(`Spotify API error: ${status}`);
+    this.status = status;
+    this.retryAfter = retryAfter;
+  }
+}
+
+// --- Helper per chiamate autenticate (con concurrency limiting e gestione 429) ---
 
 async function fetchSpotify(endpoint) {
-  const token = await getToken();
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  return enqueue(async () => {
+    const token = await getToken();
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await fetch(`${BASE_URL}${endpoint}`, { headers });
+
+    // Retry interno su 429: aspetta Retry-After e riprova una volta
+    if (res.status === 429) {
+      const wait = parseInt(res.headers.get('Retry-After') || '1', 10);
+      await new Promise((r) => setTimeout(r, wait * 1000));
+      const retry = await fetch(`${BASE_URL}${endpoint}`, { headers });
+      if (!retry.ok) {
+        throw new SpotifyApiError(
+          retry.status,
+          parseInt(retry.headers.get('Retry-After') || '0', 10) || null,
+        );
+      }
+      return retry.json();
+    }
+
+    if (!res.ok) {
+      throw new SpotifyApiError(
+        res.status,
+        parseInt(res.headers.get('Retry-After') || '0', 10) || null,
+      );
+    }
+    return res.json();
   });
-  if (!res.ok) throw new Error(`Spotify API error: ${res.status}`);
-  return res.json();
 }
 
 // --- Artisti seguiti dall'utente ---
