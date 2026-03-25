@@ -3,19 +3,20 @@ import { useQueries } from '@tanstack/react-query';
 import { getArtistAlbums } from '../services/artistsService';
 import { getLastFriday } from '../utils/getLastFriday';
 
-export function useLatestReleases(artists = []) {
+export function useLatestReleases(artists = [], enabled = false) {
   const albumQueries = useQueries({
     queries: artists.map((artist) => ({
-      queryKey: ['artistAlbums', artist.id],
-      queryFn: () => getArtistAlbums(artist.id),
-      staleTime: Infinity, // Carica una volta per sessione
+      queryKey: ['latestRelease', artist.id],
+      queryFn: () => getArtistAlbums(artist.id, 1),
+      staleTime: Infinity,
+      enabled,
     })),
   });
 
-  const isLoading = albumQueries.some((q) => q.isLoading);
+  const isLoading = enabled && albumQueries.some((q) => q.isLoading);
 
   const releases = useMemo(() => {
-    if (isLoading) return [];
+    if (!enabled || isLoading) return [];
 
     const lastFriday = getLastFriday();
     const recent = [];
@@ -31,7 +32,7 @@ export function useLatestReleases(artists = []) {
 
     recent.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
     return recent;
-  }, [albumQueries, artists, isLoading]);
+  }, [albumQueries, artists, isLoading, enabled]);
 
   return { releases, isLoading };
 }
