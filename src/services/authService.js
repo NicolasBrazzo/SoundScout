@@ -73,7 +73,7 @@ export async function login() {
   const hashed = await sha256(codeVerifier);
   const codeChallenge = base64UrlEncode(hashed);
 
-  sessionStorage.setItem(STORAGE_KEYS.codeVerifier, codeVerifier);
+  localStorage.setItem(STORAGE_KEYS.codeVerifier, codeVerifier);
 
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -118,7 +118,7 @@ async function _doHandleCallback() {
     throw new Error("Nessun codice di autorizzazione nell'URL.");
   }
 
-  const codeVerifier = sessionStorage.getItem(STORAGE_KEYS.codeVerifier);
+  const codeVerifier = localStorage.getItem(STORAGE_KEYS.codeVerifier);
   if (!codeVerifier) {
     throw new Error("Code verifier mancante. Riprova il login.");
   }
@@ -143,7 +143,7 @@ async function _doHandleCallback() {
   storeTokens(data);
 
   // Pulisci URL e sessionStorage
-  sessionStorage.removeItem(STORAGE_KEYS.codeVerifier);
+  localStorage.removeItem(STORAGE_KEYS.codeVerifier);
   window.history.replaceState({}, document.title, "/");
 
   return data.access_token;
