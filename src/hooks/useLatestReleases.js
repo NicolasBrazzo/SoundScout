@@ -7,7 +7,9 @@ export function useLatestReleases(artists = [], enabled = false) {
   const albumQueries = useQueries({
     queries: artists.map((artist) => ({
       queryKey: ['latestRelease', artist.id],
-      queryFn: () => getArtistAlbums(artist.id, 1),
+      queryFn: () => getArtistAlbums(artist.id, 1).then((data) => {
+        return data;
+      }),
       staleTime: Infinity,
       retry: false, // I retry vengono gestiti internamente da fetchSpotify
       enabled,

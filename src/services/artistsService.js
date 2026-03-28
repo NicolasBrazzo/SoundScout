@@ -78,15 +78,9 @@ export async function getArtist(artistId) {
   return fetchSpotify(`/artists/${artistId}`);
 }
 
-// --- Artisti correlati ---
-// GET /artists/{id}/related-artists
-
-export async function getRelatedArtists(artistId) {
-  const data = await fetchSpotify(`/artists/${artistId}/related-artists`);
-  return data.artists; // Array di oggetti Artist
-}
-
+// --- Album di un artista ---
 export async function getArtistAlbums(artistId, limit = 1) {
   const data = await fetchSpotify(`/artists/${artistId}/albums?limit=${limit}`);
+  console.log("AOAOAOAO")
   return data.items.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
 }

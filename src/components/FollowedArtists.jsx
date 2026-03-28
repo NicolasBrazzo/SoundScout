@@ -23,7 +23,7 @@ export const FollowedArtists = ({ artists: followedArtists = [], loading = false
         {followedArtists.length > 0 ?
           followedArtists.map((artist) => (
             <div
-              // onClick={() => setSelectedArtist(artist)}
+              onClick={() => setSelectedArtist(artist)}
               key={artist.id}
               className="group flex flex-col items-center gap-3 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-colors cursor-pointer"
             >
