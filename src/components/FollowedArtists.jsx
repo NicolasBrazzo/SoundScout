@@ -71,20 +71,7 @@ export const FollowedArtists = ({ artists: followedArtists = [], loading = false
             <h3 className="text-xl font-bold text-white">
               {selectedArtist.name}
             </h3>
-
-            {selectedArtist.genres?.length > 0 && (
-              <div className="flex flex-wrap justify-center gap-2 mt-1">
-                {selectedArtist.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 text-xs rounded-full bg-white/10 text-white/70"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            )}
-
+            
             {selectedArtist.external_urls?.spotify && (
               <a
                 href={selectedArtist.external_urls.spotify}

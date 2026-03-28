@@ -79,8 +79,7 @@ export async function getArtist(artistId) {
 }
 
 // --- Album di un artista ---
-export async function getArtistAlbums(artistId, limit = 1) {
-  const data = await fetchSpotify(`/artists/${artistId}/albums?limit=${limit}`);
-  console.log("AOAOAOAO")
+export async function getArtistAlbums(artistId, limit = 5) {
+  const data = await fetchSpotify(`/artists/${artistId}/albums?include_groups=album,single,appears_on,compilation&limit=${limit}`);
   return data.items.sort((a, b) => new Date(b.release_date) - new Date(a.release_date));
 }
